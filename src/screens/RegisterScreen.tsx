@@ -11,56 +11,61 @@ import {
   Keyboard,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import { auth } from "../firebase/firebaseConfig";
 import Toast from "react-native-toast-message";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
+//tipando e-mail e password
 type FormData = {
   email: string;
   password: string;
 };
 
-function LoginScreen() {
+function RegisterScreen() {
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<FormData>();
-  const navigation = useNavigation();
 
-  //Controlando estados para formulario de login
+  const navigation = useNavigation();
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   useEffect(() => {
-    const showSubscripton = Keyboard.addListener("keyboardDidShow", () => {
+    const showSubs = Keyboard.addListener("keyboardDidShow", () => {
       setKeyboardVisible(true);
     });
-    const hideSubscripton = Keyboard.addListener("keyboardDidHide", () => {
+    const hideSubs = Keyboard.addListener("keyboardDidHide", () => {
       setKeyboardVisible(false);
     });
-
     return () => {
-      showSubscripton.remove();
-      hideSubscripton.remove();
+      showSubs.remove();
+      hideSubs.remove();
     };
-  }, []); //Controlando estados para formulario de login
+  });
 
   const onSubmit = async (data: FormData) => {
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
-      navigation.navigate("Home" as never);
+      await createUserWithEmailAndPassword(auth, data.email, data.password);
+      Toast.show({
+        type: "success",
+        text1: "Cadastro realizado com sucesso!",
+      });
+      navigation.navigate("Login" as never);
     } catch (error: any) {
+      let message = "Erro ao criar conta.";
+      if (error.code === "auth/email-already-in-use") {
+        message = "E-mail já está em uso.";
+      } else if (error.code === "auth/weak-password") {
+        message = "Senha deve ter no minimo 6 caracteres.";
+      }
       Toast.show({
         type: "error",
-        text1: "Erro ao fazer Login",
-        text2:
-          error.code === "auth/wrong-password" ||
-          error.code === "auth/user-not-found"
-            ? "E-mail ou senha incorretos."
-            : "Tente novamente mais tarde.",
+        text1: message,
       });
     }
   };
+
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-gray-600"
@@ -81,12 +86,13 @@ function LoginScreen() {
             resizeMode="contain"
           />
           <Text className="text-center text-4xl text-white font-bold">
-            Login
+            Cadastro
           </Text>
+
           <Controller
             control={control}
             name="email"
-            rules={{ required: "Email obrigatório" }}
+            rules={{ required: "E-mail Obrigatório" }}
             render={({ field: { onChange, value } }) => (
               <TextInput
                 className="border-2 w-96 rounded-2xl bg-white border-yellow-300 text-black px-4 py-2"
@@ -94,56 +100,28 @@ function LoginScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 onChangeText={onChange}
-                value={value}
-              />
-            )}
-          />
-          {errors.email && (
-            <Text className="text-white">{errors.email.message}</Text>
-          )}
-          <Controller
+                value={value}/>
+            )}/>
+            {errors.email && <Text className="text-white">{errors.email.message}</Text>}
+            <Controller
             control={control}
             name="password"
-            rules={{ required: "Senha Obrigatória" }}
+            rules={{ required: "Senha obrigatória", minLength: {value:6,message: "Mínimo 6 caracteres"} }}
             render={({ field: { onChange, value } }) => (
               <TextInput
                 className="border-2 w-96 rounded-2xl bg-white border-yellow-300 text-black px-4 py-2"
                 placeholder="Senha"
                 secureTextEntry
                 onChangeText={onChange}
-                value={value}
-              />
-            )}
-          />
-          {errors.password && (
-            <Text className="text-white">{errors.password.message}</Text>
-          )}
-          <Pressable
-            className="bg-yellow-300 px-6 py-2 rounded-xl"
-            onPress={handleSubmit(onSubmit)}
-            android_ripple={{ color: "#e0c900" }}
-          >
-            <Text className="font-bold">Entrar</Text>
-          </Pressable>
-          <View className="flex items-center justify-center gap-2 mt-4">
-            <Pressable
-              onPress={() => navigation.navigate("ResetPassword" as never)}
-            >
-              <Text className="text-white">
-                Esqueceu a senha?
-                <Text className="text-yellow-300"> Clique Aqui!</Text>
-              </Text>
+                value={value}/>
+            )}/>
+            {errors.password && <Text className="text-white">{errors.password.message}</Text>}
+            <Pressable className="bg-yellow-300 px-6 py-2 rounded-xl" onPress={handleSubmit(onSubmit)}>
+              <Text className="font-bold">Cadastar</Text>
             </Pressable>
-            <Pressable onPress={() => navigation.navigate("Register" as never)}>
-              <Text className="text-white">
-                Não tem Conta?
-                <Text className="text-yellow-300"> Cadastre-se</Text>
-              </Text>
-            </Pressable>
-          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-export default LoginScreen;
+export default RegisterScreen;
