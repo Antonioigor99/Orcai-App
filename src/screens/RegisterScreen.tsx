@@ -18,8 +18,11 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 
 //tipando e-mail e password
 type FormData = {
+  company: string;
+  phone: string;
   email: string;
   password: string;
+  confirmPassword: string;
 };
 
 function RegisterScreen() {
@@ -27,6 +30,7 @@ function RegisterScreen() {
     control,
     handleSubmit,
     formState: { errors },
+    getValues,
   } = useForm<FormData>();
 
   const navigation = useNavigation();
@@ -81,44 +85,93 @@ function RegisterScreen() {
           style={{ justifyContent: keyboardVisible ? "flex-start" : "center" }}
         >
           <Image
-            className="w-96 h-32"
+            className="w-full max-w-md h-32"
             source={require("../../assets/Logo.png")}
             resizeMode="contain"
           />
           <Text className="text-center text-4xl text-white font-bold">
             Cadastro
           </Text>
-
+  
+          {/* Email aqui */}
           <Controller
             control={control}
             name="email"
             rules={{ required: "E-mail Obrigatório" }}
             render={({ field: { onChange, value } }) => (
               <TextInput
-                className="border-2 w-96 rounded-2xl bg-white border-yellow-300 text-black px-4 py-2"
+                className="border-2 w-full max-w-md rounded-2xl bg-white border-yellow-300 text-black px-4 py-2"
                 placeholder="E-mail"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 onChangeText={onChange}
-                value={value}/>
-            )}/>
-            {errors.email && <Text className="text-white">{errors.email.message}</Text>}
-            <Controller
+                value={value}
+              />
+            )}
+          />
+          {errors.email && (
+            <Text className="text-red-600 text-sm">{errors.email.message}</Text>
+          )}
+
+          {/* Senha aqui */}
+          <Controller
             control={control}
             name="password"
-            rules={{ required: "Senha obrigatória", minLength: {value:6,message: "Mínimo 6 caracteres"} }}
+            rules={{
+              required: "Senha obrigatória",
+              minLength: { value: 6, message: "Mínimo 6 caracteres" },
+            }}
             render={({ field: { onChange, value } }) => (
               <TextInput
-                className="border-2 w-96 rounded-2xl bg-white border-yellow-300 text-black px-4 py-2"
+                className="border-2 w-full max-w-md rounded-2xl bg-white border-yellow-300 text-black px-4 py-2"
                 placeholder="Senha"
                 secureTextEntry
                 onChangeText={onChange}
-                value={value}/>
-            )}/>
-            {errors.password && <Text className="text-white">{errors.password.message}</Text>}
-            <Pressable className="bg-yellow-300 px-6 py-2 rounded-xl" onPress={handleSubmit(onSubmit)}>
-              <Text className="font-bold">Cadastar</Text>
-            </Pressable>
+                value={value}
+              />
+            )}
+          />
+          {errors.password && (
+            <Text className="text-red-600 text-sm">{errors.password.message}</Text>
+          )}
+          {/* Confirma senha aqui */}
+          <Controller
+            control={control}
+            name="confirmPassword"
+            rules={{
+              required: "Confirme a senha",
+              validate: (value) => {
+                const { password } = getValues();
+                return value === password || "As senhas não coincidem";
+              },
+            }}
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                className="border-2 w-full max-w-md rounded-2xl bg-white border-yellow-300 text-black px-4 py-2"
+                placeholder="Confirme a senha"
+                secureTextEntry
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+          />
+          {errors.confirmPassword && (
+            <Text className="text-red-600 text-sm">{errors.confirmPassword.message}</Text>
+          )}
+          {/* Cadastrar aqui */}
+          <Pressable
+            className="bg-yellow-300 px-6 py-2 rounded-xl"
+            onPress={handleSubmit(onSubmit)}
+          >
+            <Text className="font-bold">Cadastrar</Text>
+          </Pressable>
+
+          {/* Já tem conta aqui */}
+          <Pressable onPress={() => navigation.navigate("Login" as never)}>
+            <Text className="text-white underline mt-4">
+              Já tem uma conta? Faça login
+            </Text>
+          </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
