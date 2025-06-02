@@ -13,9 +13,9 @@ function App(){
   return(
     <>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Profile">
-        {/* <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}} /> */}
-        {/* <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} /> */}
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}} />
+        <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
         {/* <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ headerShown: false }} /> */}
         {/* <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}} /> */}

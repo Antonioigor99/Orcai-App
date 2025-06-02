@@ -63,7 +63,7 @@ function LoginScreen() {
   };
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-gray-600"
+      className="flex-1 bg-gray-800"
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
     >
@@ -134,7 +134,7 @@ function LoginScreen() {
                 <Text className="text-yellow-300"> Clique Aqui!</Text>
               </Text>
             </Pressable>
-            <Pressable onPress={() => navigation.navigate("Register" as never)}>
+            <Pressable onPress={() => navigation.navigate("Profile" as never)}>
               <Text className="text-white">
                 Não tem Conta?
                 <Text className="text-yellow-300"> Cadastre-se</Text>

@@ -144,10 +144,16 @@ function ProfileScreen() {
             disabled={loading}
           >
             {loading ? (
-                <ActivityIndicator size="small" color="#000" />
-            ):(
-                <Text className="font-bold">Avançar</Text>
+              <ActivityIndicator size="small" color="#000" />
+            ) : (
+              <Text className="font-bold">Avançar</Text>
             )}
+          </Pressable>
+          {/* Já tem conta aqui */}
+          <Pressable onPress={() => navigation.navigate("Login" as never)}>
+            <Text className="text-white underline mt-4">
+              Já tem uma conta? Faça login
+            </Text>
           </Pressable>
         </View>
       </ScrollView>

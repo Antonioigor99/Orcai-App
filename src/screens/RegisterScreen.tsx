@@ -15,6 +15,9 @@ import { useNavigation } from "@react-navigation/native";
 import { auth } from "../firebase/firebaseConfig";
 import Toast from "react-native-toast-message";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase/firebaseConfig";
+import { useRoute } from "@react-navigation/native";
 
 //tipando e-mail e password
 type FormData = {
@@ -26,6 +29,13 @@ type FormData = {
 };
 
 function RegisterScreen() {
+  const [loading, setLoading] = useState(false);
+  const route = useRoute();
+  const { userName, companyName, phoneNumber } = (route.params || {}) as {
+    userName?: string;
+    companyName?: string;
+    phoneNumber?: string
+  }
   const {
     control,
     handleSubmit,
@@ -33,6 +43,7 @@ function RegisterScreen() {
     getValues,
   } = useForm<FormData>();
 
+  //rota do profile
   const navigation = useNavigation();
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   useEffect(() => {
@@ -46,11 +57,20 @@ function RegisterScreen() {
       showSubs.remove();
       hideSubs.remove();
     };
-  });
-
+  }, []);
   const onSubmit = async (data: FormData) => {
+    setLoading(true)
     try {
-      await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const user = userCredential.user
+
+      await setDoc(doc(db, 'users', user.uid), {
+        name: userName,
+        company: companyName,
+        phone: phoneNumber,
+        email: data.email,
+        createdAt: new Date()
+      })
       Toast.show({
         type: "success",
         text1: "Cadastro realizado com sucesso!",
@@ -67,12 +87,14 @@ function RegisterScreen() {
         type: "error",
         text1: message,
       });
+    } finally{
+      setLoading(false);
     }
   };
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-gray-600"
+      className="flex-1 bg-gray-800"
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
     >
@@ -92,12 +114,17 @@ function RegisterScreen() {
           <Text className="text-center text-4xl text-white font-bold">
             Cadastro
           </Text>
-  
+
           {/* Email aqui */}
           <Controller
             control={control}
             name="email"
-            rules={{ required: "E-mail Obrigatório" }}
+            rules={{
+              required: "E-mail Obrigatório", pattern: {
+                value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                message: "E-mail inválido",
+              },
+            }}
             render={({ field: { onChange, value } }) => (
               <TextInput
                 className="border-2 w-full max-w-md rounded-2xl bg-white border-yellow-300 text-black px-4 py-2"
@@ -161,7 +188,8 @@ function RegisterScreen() {
           {/* Cadastrar aqui */}
           <Pressable
             className="bg-yellow-300 px-6 py-2 rounded-xl"
-            onPress={handleSubmit(onSubmit)}
+            onPress={handleSubmit(onSubmit)} 
+            disabled={loading}
           >
             <Text className="font-bold">Cadastrar</Text>
           </Pressable>
