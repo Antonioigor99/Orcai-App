@@ -9,12 +9,14 @@ import {
   ScrollView,
   Platform,
   Keyboard,
+  TouchableOpacity,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import { auth } from "../firebase/firebaseConfig";
 import Toast from "react-native-toast-message";
+import { Feather } from "@expo/vector-icons";
 
 type FormData = {
   email: string;
@@ -27,6 +29,7 @@ function LoginScreen() {
     handleSubmit,
     formState: { errors },
   } = useForm<FormData>();
+  const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
 
   //Controlando estados para formulario de login
@@ -71,75 +74,94 @@ function LoginScreen() {
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
       >
-        <View
-          className="flex h-screen items-center gap-5 px-4"
-          style={{ justifyContent: keyboardVisible ? "flex-start" : "center" }}
-        >
-          <Image
-            className="w-96 h-32"
-            source={require("../../assets/Logo.png")}
-            resizeMode="contain"
-          />
-          <Text className="text-center text-4xl text-white font-bold">
-            Login
-          </Text>
-          <Controller
-            control={control}
-            name="email"
-            rules={{ required: "Email obrigatório" }}
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                className="border-2 w-96 rounded-2xl bg-white border-yellow-300 text-black px-4 py-2"
-                placeholder="E-mail"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                onChangeText={onChange}
-                value={value}
-              />
-            )}
-          />
-          {errors.email && (
-            <Text className="text-white">{errors.email.message}</Text>
-          )}
-          <Controller
-            control={control}
-            name="password"
-            rules={{ required: "Senha Obrigatória" }}
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                className="border-2 w-96 rounded-2xl bg-white border-yellow-300 text-black px-4 py-2"
-                placeholder="Senha"
-                secureTextEntry
-                onChangeText={onChange}
-                value={value}
-              />
-            )}
-          />
-          {errors.password && (
-            <Text className="text-white">{errors.password.message}</Text>
-          )}
-          <Pressable
-            className="bg-yellow-300 px-6 py-2 rounded-xl"
-            onPress={handleSubmit(onSubmit)}
-            android_ripple={{ color: "#e0c900" }}
+        <View className="flex justify-center">
+          <View
+            className="flex items-center justify-center p-4 gap-4 h-[90%]"
+            style={{
+              justifyContent: keyboardVisible ? "flex-start" : "center",
+            }}
           >
-            <Text className="font-bold">Entrar</Text>
-          </Pressable>
-          <View className="flex items-center justify-center gap-2 mt-4">
+            <Image
+              className="w-96 h-32"
+              source={require("../../assets/Logo.png")}
+              resizeMode="contain"
+            />
+            <Text className="text-center text-4xl text-white font-bold">
+              Login
+            </Text>
+            <Controller
+              control={control}
+              name="email"
+              rules={{ required: "Email obrigatório" }}
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  className="border-2 w-96 rounded-2xl bg-white border-yellow-300 text-black px-4 py-2"
+                  placeholder="E-mail"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+            />
+            {errors.email && (
+              <Text className="text-white">{errors.email.message}</Text>
+            )}
+            <Controller
+              control={control}
+              name="password"
+              rules={{ required: "Senha Obrigatória" }}
+              render={({ field: { onChange, value } }) => (
+                <View>
+                  <TextInput
+                    className="border-2 w-96 rounded-2xl bg-white border-yellow-300 text-black px-4 py-2"
+                    placeholder="Senha"
+                    secureTextEntry={!showPassword}
+                    onChangeText={onChange}
+                    value={value}
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                    onPress={() => setShowPassword((prev) => !prev)}
+                  >
+                    <Feather
+                      name={showPassword ? "eye" : "eye-off"}
+                      size={24}
+                      color="gray"
+                    />
+                  </TouchableOpacity>
+                </View>
+              )}
+            />
+            {errors.password && (
+              <Text className="text-white">{errors.password.message}</Text>
+            )}
             <Pressable
-              onPress={() => navigation.navigate("ResetPassword" as never)}
+              className="bg-yellow-300 px-6 py-2 rounded-xl"
+              onPress={handleSubmit(onSubmit)}
+              android_ripple={{ color: "#e0c900" }}
             >
-              <Text className="text-white">
-                Esqueceu a senha?
-                <Text className="text-yellow-300"> Clique Aqui!</Text>
-              </Text>
+              <Text className="font-bold">Entrar</Text>
             </Pressable>
-            <Pressable onPress={() => navigation.navigate("Profile" as never)}>
-              <Text className="text-white">
-                Não tem Conta?
-                <Text className="text-yellow-300"> Cadastre-se</Text>
-              </Text>
-            </Pressable>
+            <View className="flex items-center justify-center gap-2 mt-4">
+              <Pressable
+                onPress={() => navigation.navigate("ResetPassword" as never)}
+              >
+                <Text className="text-white">
+                  Esqueceu a senha?
+                  <Text className="text-yellow-300"> Clique Aqui!</Text>
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => navigation.navigate("Profile" as never)}
+              >
+                <Text className="text-white">
+                  Não tem Conta?
+                  <Text className="text-yellow-300"> Cadastre-se</Text>
+                </Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </ScrollView>
