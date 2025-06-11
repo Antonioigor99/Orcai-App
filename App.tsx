@@ -8,26 +8,56 @@ import RegisterScreen from "./src/screens/RegisterScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import ResetPasswordScreen from "./src/screens/ResetPasswordScreen";
 import ClientScreen from "./src/screens/ClientScreen";
+import { AuthProvider, useAuth } from "./src/firebase/AuthContext";
+import { ActivityIndicator, View } from "react-native";
 
 const Stack = createNativeStackNavigator();
-function App(){
-  return(
-    <>
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Client" screenOptions={{
-        headerShown: false,
-        animation: "fade"
-      }}>
-        {/* <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}} />
-        <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ headerShown: false }} /> */}
-        <Stack.Screen name="Client" component={ClientScreen} options={{ headerShown: false }} />
-        
-      </Stack.Navigator>
-    </NavigationContainer>
-    <Toast />
-    </>
+
+export type RootStackParamList = {
+  Login: undefined;
+  Register: undefined;
+  ResetPassword: undefined;
+  Client: undefined;
+  Profile: undefined;
+};
+function Routes() {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#FFD700" />
+      </View>
+    )
+  }
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade' }}>
+      {user ? (
+        //se tiver logado
+        <>
+          <Stack.Screen name="Client" component={ClientScreen} />
+          <Stack.Screen name="Profile" component={ProfileScreen} />
+          {/* Outras telas autenticadas */}
+        </>
+      ) : (
+        //se nao tiver logado
+        <>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+        </>
+      )}
+    </Stack.Navigator>
+  )
+
+}
+function App() {
+  return (
+    <AuthProvider>
+      <NavigationContainer>
+        <Routes />
+      </NavigationContainer>
+      <Toast />
+    </AuthProvider>
   )
 }
 export default App;

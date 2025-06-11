@@ -17,12 +17,17 @@ import { useNavigation } from "@react-navigation/native";
 import { auth } from "../firebase/firebaseConfig";
 import Toast from "react-native-toast-message";
 import { Feather } from "@expo/vector-icons";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../App";
 
 type FormData = {
   email: string;
   password: string;
 };
-
+type LoginScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Login'
+>;
 function LoginScreen() {
   const {
     control,
@@ -30,7 +35,7 @@ function LoginScreen() {
     formState: { errors },
   } = useForm<FormData>();
   const [showPassword, setShowPassword] = useState(false);
-  const navigation = useNavigation();
+  const navigation = useNavigation<LoginScreenNavigationProp>();
 
   //Controlando estados para formulario de login
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -51,14 +56,17 @@ function LoginScreen() {
   const onSubmit = async (data: FormData) => {
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
-      navigation.navigate("Home" as never);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Client' }],
+      })
     } catch (error: any) {
       Toast.show({
         type: "error",
         text1: "Erro ao fazer Login",
         text2:
           error.code === "auth/wrong-password" ||
-          error.code === "auth/user-not-found"
+            error.code === "auth/user-not-found"
             ? "E-mail ou senha incorretos."
             : "Tente novamente mais tarde.",
       });
@@ -146,7 +154,7 @@ function LoginScreen() {
             </Pressable>
             <View className="flex items-center justify-center gap-2 mt-4">
               <Pressable
-                onPress={() => navigation.navigate("ResetPassword" as never)}
+                onPress={() => navigation.navigate("ResetPassword")}
               >
                 <Text className="text-white">
                   Esqueceu a senha?
@@ -154,7 +162,7 @@ function LoginScreen() {
                 </Text>
               </Pressable>
               <Pressable
-                onPress={() => navigation.navigate("Profile" as never)}
+                onPress={() => navigation.navigate("Register")}
               >
                 <Text className="text-white">
                   Não tem Conta?
